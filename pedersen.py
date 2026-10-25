@@ -145,6 +145,17 @@ def add(C1, C2):
     return _add(C1, C2)
 
 
+def sub(C1, C2):
+    """Subtract one commitment from another (negate ``C2`` then add).
+
+    >>> sub(commit(42, 8), commit(10, 3)) == commit(32, 5)
+    True
+    >>> sub(commit(10, 3), commit(10, 3)) is INF
+    True
+    """
+    return _add(C1, (C2[0], (-C2[1]) % P))
+
+
 def demo():
     """Run a small confidential-transaction-style demo."""
     import secrets
@@ -159,7 +170,7 @@ def demo():
     print(f"output commitment : ({c_out[0]:#x}, {c_out[1]:#x})")
     # Balance check without revealing amounts: C_in - C_out must be a
     # commitment to zero, i.e. openable with value 0.
-    diff = _add(c_in, (c_out[0], (-c_out[1]) % P))
+    diff = sub(c_in, c_out)
     print("balanced (opens to 0)?", verify(diff, 0, (r_in - r_out) % N))
     print("tampered amount opens?", verify(c_out, 31, r_out))
 
